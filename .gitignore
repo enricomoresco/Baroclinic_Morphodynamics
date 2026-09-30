@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+# ROMS build and runs
+roms/Build_roms*/
+roms/romsS
+roms/romsM
+roms/romsO
+roms/romsG
+roms/runs/
+*.nc
+build.log

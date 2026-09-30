@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper listed under preferred-citation."
+title: "Code for: Morphodynamic equilibrium of river-dominated estuaries under a weak longitudinal density gradient"
+type: software
+license: MIT
+authors:
+  - family-names: Moresco
+    given-names: Enrico
+    affiliation: "University of Genoa"
+  - family-names: Durante
+    given-names: Lorenzo
+  - family-names: Tambroni
+    given-names: Nicoletta
+    affiliation: "University of Genoa"
+preferred-citation:
+  type: article
+  title: "Morphodynamic equilibrium of river-dominated estuaries under a weak longitudinal density gradient"
+  authors:
+    - family-names: Moresco
+      given-names: Enrico
+    - family-names: Durante
+      given-names: Lorenzo
+    - family-names: Tambroni
+      given-names: Nicoletta
+  journal: "Physics of Fluids"
+  status: in-preparation
+  year: 2026
