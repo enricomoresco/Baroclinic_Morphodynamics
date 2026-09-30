@@ -153,6 +153,12 @@ the first stage are bit-for-bit identical to those used for the paper.
 
 ![Fig. 3](figures/fig3_roms_equilibrium.png)
 
+## Acknowledgements
+
+Parts of the code and of this documentation were prepared with the help of an AI-based coding
+assistant. All scripts were reviewed by the authors, and the results reported here were checked by
+rerunning the full workflow.
+
 ## Citation
 
 See [`CITATION.cff`](CITATION.cff). The paper reference will be updated on publication.
