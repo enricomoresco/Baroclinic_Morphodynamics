@@ -3,7 +3,8 @@
 The configuration uses the unmodified ROMS source code (revision `57aecf5` of
 <https://github.com/myroms/roms>). The only ROMS files that differ are the analytical functions in
 `Functionals/`, which ROMS picks up instead of its own because `build_roms.sh` points
-`MY_ANALYTICAL_DIR` to this folder, and the build script itself.
+`MY_ANALYTICAL_DIR` to this folder, the CPP header `estuary_test.h`, which replaces
+`ROMS/Include/estuary_test.h` because `MY_HEADER_DIR` points to `roms/`, and the build script itself.
 
 | File | Change |
 |---|---|
@@ -14,6 +15,7 @@ The configuration uses the unmodified ROMS source code (revision `57aecf5` of
 | `ana_tobc.h` | boundary salinity from the tanh profile |
 | `ana_tclima.h` | salinity climatology (nudging target) equal to the tanh profile |
 | `ana_sediment.h` | sediment bed 30 m thick with porosity 0.4, so that it cannot be depleted |
+| `estuary_test.h` | bed-load (Meyer-Peter and Müller) transport instead of suspended load, morphology and upwind bed-load options, analytical salinity climatology and nudging coefficients; comments describing the `user(...)` parameters |
 | `build_roms.sh` | application `ESTUARY_TEST`, serial gfortran build, no debugging, no PIO, `MY_ANALYTICAL_DIR` set to `Functionals/`, error if `ROMS_ROOT_DIR` is not set |
 
 The `user(...)` parameters are listed in `estuary_test.h` and set by `scripts/make_run.py`.
@@ -157,6 +159,18 @@ The `user(...)` parameters are listed in `estuary_test.h` and set by `scripts/ma
              DO ised=1,NST
                bed_frac(i,j,k,ised)=1.0_r8/REAL(NST,r8)
              END DO
+--- ROMS/Include/estuary_test.h
++++ roms/estuary_test.h
+@@ -24 +41,5 @@
+-# define SUSPLOAD
++# undef  SUSPLOAD
++# define BEDLOAD_MPM
++# define SED_MORPH
++# define SED_UPWIND
++# define SLOPE_LESSER
+@@ -47,0 +69,2 @@
++#define ANA_TCLIMA
++#define ANA_NUDGCOEF
 --- ROMS/Bin/build_roms.sh
 +++ roms/build_roms.sh
 @@ -158,7 +158,7 @@

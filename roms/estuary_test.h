@@ -1,4 +1,11 @@
 /*
+** git $Id$
+*******************************************************************************
+** Copyright (c) 2002-2026 The ROMS Group                                    **
+**   Licensed under a MIT/X style license                                    **
+**   See License_ROMS.md                                                     **
+*******************************************************************************
+**
 ** River-dominated channel with a prescribed (nudged) longitudinal salinity
 ** field, used for the equilibrium test of Sec. IV B of the paper.
 **

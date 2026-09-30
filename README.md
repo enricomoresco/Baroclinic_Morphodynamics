@@ -159,5 +159,5 @@ See [`CITATION.cff`](CITATION.cff). The paper reference will be updated on publi
 
 ## License
 
-MIT, see [`LICENSE`](LICENSE). The files derived from ROMS (`roms/Functionals/`, `roms/build_roms.sh`)
-remain under the ROMS license, reproduced in [`roms/LICENSE_ROMS.md`](roms/LICENSE_ROMS.md).
+MIT, see [`LICENSE`](LICENSE). The files derived from ROMS (`roms/Functionals/`, `roms/estuary_test.h`,
+`roms/build_roms.sh`) remain under the ROMS license, reproduced in [`roms/LICENSE_ROMS.md`](roms/LICENSE_ROMS.md).

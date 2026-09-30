@@ -20,6 +20,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-The files in roms/Functionals/ and roms/build_roms.sh are modified versions of
-files of the Regional Ocean Modeling System (ROMS) and remain under the ROMS
-license, reproduced in roms/LICENSE_ROMS.md.
+The files in roms/Functionals/, roms/estuary_test.h and roms/build_roms.sh are
+modified versions of files of the Regional Ocean Modeling System (ROMS) and
+remain under the ROMS license, reproduced in roms/LICENSE_ROMS.md.
