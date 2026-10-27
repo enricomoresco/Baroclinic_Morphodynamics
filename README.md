@@ -2,16 +2,18 @@
 
 Code accompanying the paper
 
-> E. Moresco, L. Durante and N. Tambroni, *Morphodynamic equilibrium of river-dominated estuaries
-> under a weak longitudinal density gradient*, Physics of Fluids (in preparation).
+> E. Moresco, L. Durante and N. Tambroni, *Effect of a weak longitudinal density gradient on the bed
+> stress and equilibrium bed profile of river-dominated estuaries*, Physics of Fluids (in preparation).
 
-The repository reproduces the three numerical results of the paper:
+The repository reproduces the numerical results and the figures of the paper:
 
 | Folder | Paper | What it does | Run time |
 |---|---|---|---|
 | [`verification/`](verification) | Sec. III B, Fig. 1 | exact solution of Eqs. (9)–(10) compared with the first-order solution, Eq. (13) | seconds |
-| [`kepsilon_1dv/`](kepsilon_1dv) | Sec. IV A, Table II, Appendix A, Fig. 2 | one-dimensional vertical k–ε model that tests the friction law, Eq. (7) | ~15 min |
+| [`kepsilon_1dv/`](kepsilon_1dv) | Secs. IV A, IV C, V B, Table II, Appendix A, Fig. 2 | one-dimensional vertical k–ε model that tests the friction law, Eq. (7), and its diagnostics | ~25 min |
 | [`roms/`](roms) | Sec. IV B, Appendix B, Fig. 3 | ROMS configuration and analysis of the equilibrium test | ~20 min (2 cores) |
+| [`families/`](families) | Sec. V B, Fig. 4 | first-order response to prescribed salinity distributions, Eq. (14) | seconds |
+| [`olabarrieta/`](olabarrieta) | Sec. VI B, Fig. 5 | analysis of the published simulations of Olabarrieta et al. (2018) | seconds |
 
 The outputs of all scripts are stored in [`results/`](results) and [`figures/`](figures), so the figures
 can be redrawn without running the models again.
@@ -26,7 +28,13 @@ python verification/run_verification.py        # Fig. 1, results/verification.js
 python kepsilon_1dv/run_sweep.py               # results/kepsilon_sweep.json
 python kepsilon_1dv/run_sensitivity.py         # results/kepsilon_sensitivity.json
 python kepsilon_1dv/plot_friction_factor.py    # Fig. 2
+python kepsilon_1dv/run_nudging.py             # Appendix A, results/kepsilon_nudging.json
+python kepsilon_1dv/run_threshold.py           # Sec. IV A and Appendix A, results/kepsilon_threshold.json
+python kepsilon_1dv/exchange_and_bbl.py        # Secs. IV A and V B, results/kepsilon_exchange_bbl.json
+python kepsilon_1dv/local_equilibrium_1dv.py   # Sec. IV C, results/local_equilibrium_1dv.json
 python roms/scripts/plot_roms.py               # Fig. 3 from results/roms_equilibrium.json
+python families/fig4_response.py               # Fig. 4 and the numbers of Sec. V B
+python olabarrieta/make_fig5.py results figures/fig5_olabarrieta.pdf   # Fig. 5 from results/olabarrieta_consistent.npz
 ```
 
 The Python scripts run on Linux, macOS and Windows. Building and running ROMS needs Linux or macOS
@@ -82,14 +90,34 @@ step (checked for $\Delta t=5$, 2.5 and 1.25 s).
   stratified variants, plus the threshold beyond which the stratified runs have no steady state;
 - `run_sensitivity.py`: grid (50, 100, 200 cells), $c_3$, $Pr_t$ and surface mixing length; amplitude of
   the exchange flow at $\delta=-0.1$;
-- `plot_friction_factor.py`: Fig. 2.
+- `plot_friction_factor.py`: Fig. 2;
+- `run_nudging.py`: relaxation of the salinity towards the depth average, $-S'/\tau_n$ (argument `tau_n`
+  of `run()`), which mimics the nudging of the ROMS runs (Appendix A);
+- `run_threshold.py`: end of the stratified branch, with integrations of $5\times10^5$ and $6\times10^5$ s
+  (Sec. IV A and Appendix A);
+- `exchange_and_bbl.py`: salt carried landward by the exchange flow, as an equivalent dispersion
+  coefficient (Sec. V B), and height of the bottom boundary layer compared with the scaling of
+  Stacey and Ralston (2005) (Sec. IV A);
+- `local_equilibrium_1dv.py`: local equilibrium depth with the stratified $F(\delta)$ of `run_sweep.py`
+  in place of Eq. (7) (Sec. IV C).
 
-Expected output: the barotropic reference has $\bar u=1.03$ m/s and $c_f=2.31\times10^{-3}$.
+Expected output of the last four scripts: $\gamma_{\rm eff}=0.235$ at $\delta=-0.02$ without relaxation
+and 0.218, 0.162, 0.059 for $\tau_n=3600$, 600 and 86 s; the stratified runs are steady at
+$\delta=-0.328$ ($F=0.50$) and $-0.333$ ($F=0.21$, bed–surface salinity difference 46 psu), while at
+$\delta=-0.334$ $F$ keeps decreasing; at $\delta=-0.1$ the exchange flow carries salt
+like a dispersion coefficient of 4.0 (neutral) and 5.0 m²/s (stratified), against $2.3\times10^4$ m²/s
+needed to balance the river at a mean salinity of 15 psu; the height at which the flux Richardson number
+reaches 0.2 is 0.92, 0.70 and 0.49 times the depth at $\delta=-0.1$, $-0.2$ and $-0.3$ (scaling: 0.95,
+0.63, 0.48); the local shoaling with the stratified friction law is 3.89 % at $\delta_0=-0.3$ and
+8.48 % at $\delta_0=-0.5$.
+
+Expected output of the first scripts: the barotropic reference has $\bar u=1.03$ m/s and $c_f=2.31\times10^{-3}$.
 Without stratification $|\gamma|<0.01$: the k–ε eddy viscosity adjusts to the local stress, which the
 baroclinic force increases in the upper water column, and the velocity profile hardly changes. With
 stratification $\gamma=0.23$–$0.25$ as $\delta\to0$ and $0.25$–$0.27$ at $\delta=-0.05$
-($c_3=-0.4$ to $-0.6$), within 1 % on grids of 50–200 cells; the stratified runs have no steady state
-for $\delta\le-0.325$. At $\delta=-0.1$ the departure of the velocity profile from the barotropic one
+($c_3=-0.4$ to $-0.6$), within 1 % on grids of 50–200 cells. The bisection of `run_sweep.py`, which
+requires $F>0.5$ after $1.2\times10^5$ s, stops at $\delta=-0.325$; with the longer integrations of
+`run_threshold.py` the steady branch extends to $\delta=-0.333$, as in the paper. At $\delta=-0.1$ the departure of the velocity profile from the barotropic one
 (exchange flow) is 0.27 % of $\bar u$ without and 1.5–1.7 % with stratification.
 
 ![Fig. 2](figures/fig2_friction_factor.png)
@@ -152,6 +180,41 @@ this amplitude, the cumulative mismatch vanishes at 1.01 times the theoretical s
 the first stage are bit-for-bit identical to those used for the paper.
 
 ![Fig. 3](figures/fig3_roms_equilibrium.png)
+
+## 4. Response to prescribed salinity distributions (`families/`)
+
+First-order response, Eq. (14), of the reference river of Sec. V B (depth 10 m, velocity 1 m/s,
+roughness 1 mm, sea salinity 30 psu, salt intrusion 40 km) to a Van der Burgh profile with $K=0.6$, a
+linear profile and a hyperbolic-tangent front.
+
+- `fig4_response.py`: Fig. 4 (`figures/fig4_families.*`) and the numbers quoted in Sec. V B.
+
+Expected output: maximum $|\delta_0|$ of 0.17, 0.10 and 0.25; maximum shoaling per unit $\gamma$ of 76,
+46 and 114 cm; set-up of 12.0 cm for $\gamma=0.074$ and 13.3 cm for $\gamma=0.3$ (11.9 and 13.2 cm for
+the front), against a hydrostatic head of 11.6 cm.
+
+![Fig. 4](figures/fig4_families.png)
+
+## 5. Simulations of Olabarrieta et al. (2018) (`olabarrieta/`)
+
+Depth reduction and salinity gradient in the baroclinic and barotropic runs of Fig. 8 of
+Olabarrieta et al. (2018, *J. Geophys. Res. Earth Surf.* 123, 2901–2924), from their published data set
+(Figshare, [doi:10.6084/m9.figshare.5975164](https://doi.org/10.6084/m9.figshare.5975164)). The data set
+is not part of this repository: download and unzip it, then
+
+```bash
+python olabarrieta/olabarrieta_consistent.py <unzipped DATASET folder> results   # results/olabarrieta_consistent.npz
+python olabarrieta/make_fig5.py results figures/fig5_olabarrieta.pdf               # Fig. 5
+```
+
+The second command alone redraws Fig. 5 from the stored `results/olabarrieta_consistent.npz`.
+Expected output: depth change negative over 96 % of the estuary, maximum $-9.4$ m (59 % of the
+barotropic depth) within 0.5 km of the maximum salinity gradient; within 36.5 km of the head (24 % of
+the estuary) the salinity gradient is below 2 % of its maximum and the depth is reduced by 2.2 m on
+average (34 %), 10 % of the integrated depth change; a local response fitted to the whole profile
+explains 77 % of its squared magnitude.
+
+![Fig. 5](figures/fig5_olabarrieta.png)
 
 ## Acknowledgements
 

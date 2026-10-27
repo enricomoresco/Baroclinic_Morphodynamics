@@ -11,6 +11,8 @@ more strongly near the bed. The model integrates in time to steady state
 
 S' is the departure of salinity from its depth average: the first term of (A2) is the
 straining of the horizontal gradient by the sheared flow, the second the mixing.
+Optionally a relaxation term -S'/tau_n is added to (A2); it mimics the salinity nudging of
+the ROMS runs (Appendix A, last paragraph).
 Turbulence follows the standard k-epsilon model (Rodi 1993) with shear production
 P = nu_t (du/dz)^2 and buoyancy production B = -K_s N^2, N^2 = -g beta dS'/dz,
 nu_t = c_mu k^2/epsilon, K_s = nu_t/Pr_t, and the buoyancy coefficient c3 of
@@ -64,12 +66,14 @@ def _dirichlet(lo, d, up, rhs, i, value):
 
 
 def run(S=2.5e-5, delta=0.0, D=10.0, z0=1e-3, N=100, buoyancy=True, c3=C3_STABLE,
-        prt=PR_T, t_end=6e4, dt=5.0, z0s=0.1):
+        prt=PR_T, t_end=6e4, dt=5.0, z0s=0.1, tau_n=None):
     """Integrate to t_end (s) and return the final state.
 
     S: surface slope; delta: pressure-gradient ratio (< 0 opposes the flow); D: depth (m);
     z0: bed roughness length (m); N: number of cells; buoyancy: False for the neutral runs;
-    c3, prt: buoyancy coefficient and turbulent Prandtl number; z0s: surface mixing length (m).
+    c3, prt: buoyancy coefficient and turbulent Prandtl number; z0s: surface mixing length (m);
+    tau_n: relaxation time (s) of S' towards zero, None for no relaxation.
+    The returned profiles of k, epsilon, N^2, M^2 = (du/dz)^2, P and B are those of the last step.
     """
     dz = D / N
     z = (np.arange(N) + 0.5) * dz
@@ -95,6 +99,8 @@ def run(S=2.5e-5, delta=0.0, D=10.0, z0=1e-3, N=100, buoyancy=True, c3=C3_STABLE
         ubar = u.mean()
         # salinity departure: straining and mixing
         lo, d, up = _diffusion_matrix(nu_f / prt, dz, dt)
+        if tau_n is not None:                      # relaxation -S'/tau_n, implicit
+            d = d + dt / tau_n
         s = _tridiag(lo, d, up, s - dt * (u - ubar) * Sx)
         s -= s.mean()
         # shear and buoyancy frequency at cell centres
@@ -127,7 +133,8 @@ def run(S=2.5e-5, delta=0.0, D=10.0, z0=1e-3, N=100, buoyancy=True, c3=C3_STABLE
     ustar = KAPPA * abs(u[0]) / np.log(z[0] / z0)
     taub = ustar ** 2
     return dict(z=z, u=u, ubar=u.mean(), taub=taub, taub_exact=G * D * S * (1 + delta),
-                s=s, dS=s[0] - s[-1], nu=CMU * k ** 2 / eps, D=D, S=S, delta=delta)
+                s=s, dS=s[0] - s[-1], nu=CMU * k ** 2 / eps, D=D, S=S, delta=delta,
+                Sx=Sx, k=k, eps=eps, N2=N2, M2=M2, P=P, B=B)
 
 
 def friction_coefficient(r):

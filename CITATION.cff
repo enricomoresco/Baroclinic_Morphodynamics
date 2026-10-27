@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this code, please cite the paper listed under preferred-citation."
-title: "Code for: Morphodynamic equilibrium of river-dominated estuaries under a weak longitudinal density gradient"
+title: "Code for: Effect of a weak longitudinal density gradient on the bed stress and equilibrium bed profile of river-dominated estuaries"
 type: software
 license: MIT
 authors:
@@ -9,12 +9,13 @@ authors:
     affiliation: "University of Genoa"
   - family-names: Durante
     given-names: Lorenzo
+    affiliation: "University of Genoa"
   - family-names: Tambroni
     given-names: Nicoletta
     affiliation: "University of Genoa"
 preferred-citation:
   type: article
-  title: "Morphodynamic equilibrium of river-dominated estuaries under a weak longitudinal density gradient"
+  title: "Effect of a weak longitudinal density gradient on the bed stress and equilibrium bed profile of river-dominated estuaries"
   authors:
     - family-names: Moresco
       given-names: Enrico
