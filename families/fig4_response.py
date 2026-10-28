@@ -49,33 +49,45 @@ def response(S, gamma):
 
 def main():
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "figures" / "fig4_families.pdf"
-    cases = [("Van der Burgh, K = 0.6", van_der_burgh(0.6)), ("linear, K = 1", van_der_burgh(1.0)),
-             ("front", front())]
+    cases = [(r"$K=0.6$", van_der_burgh(0.6)), (r"$K=1$", van_der_burgh(1.0)), ("front", front())]
     print(f"c_f = {CF:.5f}, s = {SLOPE:.2e}, eps_L = {BETA * D * S_SEA / (2 * SLOPE * LS):.3f}, "
           f"hydrostatic head = {100 * BETA * S_SEA * D / 2:.1f} cm")
-    fig, ax = plt.subplots(3, 1, figsize=(3.4, 6.0), sharex=True)
-    for name, S in cases:
+    # same style as Figs. 1-3 (verification/run_verification.py): 13.9 cm wide, 8-pt fonts
+    cm = 1 / 2.54
+    plt.rcParams.update({"font.size": 8, "axes.labelsize": 8, "axes.titlesize": 8, "xtick.labelsize": 8,
+                         "ytick.labelsize": 8, "legend.fontsize": 8, "legend.frameon": False,
+                         "axes.spines.top": False, "axes.spines.right": False, "axes.linewidth": 0.6,
+                         "lines.linewidth": 1.4, "pdf.fonttype": 42, "axes.titlelocation": "left",
+                         "axes.titlepad": 3})
+    colors = ["#1d4e89", "#c2410c", "0.15"]
+    fig, ax = plt.subplots(1, 3, figsize=(13.9 * cm, 4.8 * cm))
+    for (name, S), c in zip(cases, colors):
         delta0, dD1, _ = response(S, 1.0)
         _, _, h074 = response(S, 0.074)
         _, _, h03 = response(S, 0.3)
-        print(f"{name:24s} max|delta0| = {np.abs(delta0).max():.3f}   max shoaling per unit gamma = "
+        print(f"{name.strip('$'):10s} max|delta0| = {np.abs(delta0).max():.3f}   max shoaling per unit gamma = "
               f"{-100 * dD1.min():.0f} cm   set-up = {100 * h074[-1]:.1f} cm (gamma 0.074), "
               f"{100 * h03[-1]:.1f} cm (gamma 0.3)")
-        ax[0].plot(x / 1e3, S, label=name)
-        ax[1].plot(x / 1e3, 100 * dD1)
-        ax[2].plot(x / 1e3, 100 * h074)
-    ax[2].axhline(100 * BETA * S_SEA * D / 2, color="0.4", ls=":", lw=1)
-    ax[0].set_ylabel("salinity (psu)")
-    ax[1].set_ylabel(r"$\Delta D/\gamma$ (cm)")
-    ax[2].set_ylabel(r"set-up (cm)")
-    ax[2].set_xlabel("distance from the mouth (km)")
-    ax[0].legend(frameon=False, fontsize=7)
-    for a, lab in zip(ax, "abc"):
-        a.set_title(f"({lab})", loc="left", fontsize=9)
-    fig.tight_layout()
+        ax[0].plot(x / 1e3, S, color=c, label=name)
+        ax[1].plot(x / 1e3, 100 * dD1, color=c)
+        ax[2].plot(x / 1e3, 100 * h074, color=c)
+    ax[2].axhline(100 * BETA * S_SEA * D / 2, color="0.5", ls=":", lw=1.0)
+    ax[0].set_ylabel(r"$S^*$ (psu)")
+    ax[1].set_ylabel(r"$\Delta D^*/\gamma$ (cm)")
+    ax[2].set_ylabel(r"$\Delta h^*$ (cm)")
+    ax[0].set_title("(a) salinity")
+    ax[1].set_title("(b) local depth change")
+    ax[2].set_title(r"(c) set-up, $\gamma=0.074$")
+    for a in ax:
+        a.set_xlabel(r"$x^*$ (km)")
+        a.set_xlim(0, 60)
+        a.set_xticks([0, 20, 40, 60])
+    ax[0].legend(loc="upper right", handlelength=1.6, borderaxespad=0.2)
+    fig.tight_layout(pad=0.3, w_pad=1.0)
     out.parent.mkdir(exist_ok=True)
-    fig.savefig(out)
-    print("written:", out)
+    for path in (out, out.with_suffix(".png")):
+        fig.savefig(path, dpi=300, metadata={"CreationDate": None} if path.suffix == ".pdf" else {})
+    print("written:", out, "and", out.with_suffix(".png"))
 
 
 if __name__ == "__main__":
